@@ -64,6 +64,16 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	}
 
 	/**
+	 * Return the current query.
+	 *
+	 * @return string
+	 */
+	public function get_current_query ()
+	{
+		return $this->get_file(false);
+	}
+
+	/**
 	 * Return data as an array.
 	 *
 	 * @return array
@@ -94,6 +104,16 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	}
 
 	/**
+	 * Return file extension
+	 *
+	 * @return string
+	 */
+	protected function get_file_extension ()
+	{
+		return 'json';
+	}
+
+	/**
 	 * Return file.
 	 *
 	 * @param boolean ext With extension or not (default: true)
@@ -104,19 +124,19 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 		$file = $this->_file;
 		if ($ext)
 		{
-			$file .= '.'.self::$type;
+			$file .= '.'.$this->get_file_extension();
 		}
 		return $file;
 	}
 
 	/**
-	 * Return the current query.
+	 * Get initialization parameters.
 	 *
-	 * @return string
+	 * @return mixed
 	 */
-	public function get_current_query ()
+	public function get_initialization ()
 	{
-		return $this->get_file(false);
+		return $this->_init;
 	}
 
 	/**
@@ -191,7 +211,7 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 		}
 
 		// Rename the current element
-		if (!@rename($file, $query . '.' . self::$type))
+		if (!@rename($file, $query . '.' . $this->get_file_extension()))
 		{
 			return FALSE;
 		}

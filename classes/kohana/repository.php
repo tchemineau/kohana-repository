@@ -44,7 +44,7 @@ abstract class Kohana_Repository
 	 */
 	public function get_data ( $default = false )
 	{
-		if (!is_null($this->_data) || $this->load_data())
+		if (!is_null($this->_data) || $this->_load_data())
 		{
 			return $this->_data;
 		}
@@ -113,7 +113,7 @@ abstract class Kohana_Repository
 		// By default, data is saved instantly to the repository
 		if ($save)
 		{
-			return $this->save_data();
+			return $this->_save_data();
 		}
 
 		// In all other case, set_data could not be into error
