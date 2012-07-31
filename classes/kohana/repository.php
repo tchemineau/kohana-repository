@@ -69,6 +69,7 @@ abstract class Kohana_Repository
 
 	/**
 	 * Get the repository mapper.
+	 * If you want to overload it, use _get_mapper() method instead.
 	 *
 	 * @param boolean $force Force to rebuild the mapper.
 	 * @return Repository_Mapper
@@ -125,7 +126,10 @@ abstract class Kohana_Repository
 	 *
 	 * @return Repository_Mapper
 	 */
-	protected abstract function _get_mapper ();
+	protected function _get_mapper ()
+	{
+		return Repository_Mapper::factory()->initialize(array());
+	}
 
 	/**
 	 * Load data from the repository and store it into $_data.
