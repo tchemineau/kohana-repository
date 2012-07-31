@@ -139,18 +139,26 @@ abstract class Kohana_Repository_Mapper
 	 * @param $initialization Init parameters
 	 * @return Model_Mapper
 	 */
-	public function initialize ( $initialization )
+	public function initialize ( $initialization = null )
 	{
 		$this->_data = null;
 		$this->_init = $initialization;
 
-		if (isset($initialization['query']))
+		if (!is_null($initialization))
 		{
-			$this->select($initialization['query']);
+			if (isset($initialization['query']))
+			{
+				$this->select($initialization['query']);
+			}
+			if (isset($initialization['type']))
+			{
+				$this->_type = $initialization['type'];
+			}
 		}
-		if (isset($initialization['type']))
+
+		if (!is_null($this->get_current_query()))
 		{
-			$this->_type = $initialization['type'];
+			$this->convert();
 		}
 
 		return $this;
