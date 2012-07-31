@@ -7,13 +7,6 @@ class Kohana_Repository_Mapper_Xml extends Repository_Mapper_Json
 {
 
 	/**
-	 * XML tag.
-	 *
-	 * @var string
-	 */
-	private $_tag = null;
-
-	/**
 	 * Array uses when parsing XML data.
 	 *
 	 * @var array
@@ -42,32 +35,15 @@ class Kohana_Repository_Mapper_Xml extends Repository_Mapper_Json
 	public function get_data_as_string ()
 	{
 		$xmlstr = '<?xml version="1.0" encoding="utf-8"?>' . "\n";
-		$xmlstr .= '<' . $this->_tag . 's>' . "\n";
+		$xmlstr .= '<' . $this->get_type() . 's>' . "\n";
 		foreach ($this->get_as_array() as $index => $value)
 		{
-			$xmlstr .= '	<' . $this->_tag . ' id="' . $index . '">' . "\n";
+			$xmlstr .= '	<' . $this->get_type() . ' id="' . $index . '">' . "\n";
 			$xmlstr .= '		' . bas64_encode($value) . "\n";
-			$xmlstr .= '	</' . $this->_tag . '>' . "\n";
+			$xmlstr .= '	</' . $this->get_type() . '>' . "\n";
 		}
-		$xmlstr .= '</' . $this->_tag . 's>';
+		$xmlstr .= '</' . $this->get_type() . 's>';
 		return $xmlstr;
-	}
-
-	/**
-	 * Initialize this XML mapper.
-	 *
-	 * @param array $initialization An array of parameters.
-	 * @return Repository_Mapper
-	 */
-	public function initialize ( $initialization )
-	{
-		parent::initialize($initialization);
-
-		if (isset($initialization['tag']))
-		{
-			$this->set_tag($initialization['tag']);
-		}
-		return $this;
 	}
 
 	/**
@@ -78,7 +54,7 @@ class Kohana_Repository_Mapper_Xml extends Repository_Mapper_Json
 	 */
 	public function set_data_from_string ( $data )
 	{
-		self::$_xmlTag = $this->_tag;
+		self::$_xmlTag = $this->get_type();
 		$xmlp = xml_parser_create();
 		xml_set_element_handler($xmlp, "self::xml_opened_tag_callback", "self::xml_closed_tag_callback");
 		xml_set_character_data_handler($xmlp, "self::xml_value_callback");
@@ -86,18 +62,6 @@ class Kohana_Repository_Mapper_Xml extends Repository_Mapper_Json
 		xml_parser_free($xmlp);
 		$this->_data = self::$_xmlData;
 		self::$_xmlData = Array();
-		return $this;
-	}
-
-	/**
-	 * Set tag.
-	 *
-	 * @param string tag A tag
-	 * @return Repository_Mapper
-	 */
-	public function set_tag ( $tag )
-	{
-		$this->_tag = $tag;
 		return $this;
 	}
 

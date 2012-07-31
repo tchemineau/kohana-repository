@@ -8,6 +8,27 @@ abstract class Kohana_Repository_Mapper
 {
 
 	/**
+	 * Data mapper.
+	 *
+	 * @var mixed
+	 */
+	protected $_data = null;
+
+	/**
+	 * Initialization.
+	 *
+	 * @var mixed
+	 */
+	protected $_init = null;
+
+	/**
+	 * Data type.
+	 *
+	 * @var string
+	 */
+	protected $_type = 'none';
+
+	/**
 	 * Convert data of an old repository mapper to the current element
 	 *
 	 * @return Model_Mapper
@@ -54,17 +75,17 @@ abstract class Kohana_Repository_Mapper
 	 * Get an instance of given registered mapper.
 	 * If no type given, get it from global options.
 	 *
-	 * @param $type Type of the mapper.
+	 * @param $name Name of the mapper.
 	 * @return Model_Mapper
 	 */
-	public static function factory ( $type = null )
+	public static function factory ( $name = null )
 	{
-		if (is_null($type))
+		if (is_null($name))
 		{
-			$type = self::get_default_type();
+			$name = Kohana::$config->load('repository')->get('mapper_default');
 		}
 
-		$class = 'Repository_Mapper_' . $type;
+		$class = 'Repository_Mapper_' . $name;
 		return new $class;
 	}
 
@@ -83,36 +104,57 @@ abstract class Kohana_Repository_Mapper
 	public abstract function get_data_as_string ();
 
 	/**
-	 * Return a the current query.
+	 * Return the current query.
 	 *
 	 * @return mixed
 	 */
 	public abstract function get_current_query ();
 
 	/**
-	 * Get the default type.
-	 *
-	 * @return string
-	 */
-	public static function get_default_type ()
-	{
-		return Kohana::$config->load('repository')->get('mapper_default');
-	}
-
-	/**
 	 * Get initialization parameters.
 	 *
 	 * @return mixed
 	 */
-	public abstract function get_initialization ();
+	public function get_initialization ()
+	{
+		return $this->_init;
+	}
+
+	/**
+	 * Get the default type.
+	 *
+	 * @return string
+	 */
+	public static function get_type ()
+	{
+		return $this->_type;
+	}
 
 	/**
 	 * Initialize the mapper and return it.
+	 * By default, $initialization is an array which contains two parameters:
+	 * query: the query to auto select an element into the repository mapper
+	 * type: the type of the data into the repository mapper (ie: user)
 	 *
 	 * @param $initialization Init parameters
 	 * @return Model_Mapper
 	 */
-	public abstract function initialize ( $initialization );
+	public function initialize ( $initialization )
+	{
+		$this->_data = null;
+		$this->_init = $initialization;
+
+		if (isset($initialization['query']))
+		{
+			$this->select($initialization['query']);
+		}
+		if (isset($initialization['type']))
+		{
+			$this->_type = $initialization['type'];
+		}
+
+		return $this;
+	}
 
 	/**
 	 * Modify the current selected element.

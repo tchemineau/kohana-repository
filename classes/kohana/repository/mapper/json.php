@@ -7,25 +7,11 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 {
 
 	/**
-	 * Mapper data.
-	 *
-	 * @var array
-	 */
-	protected $_data = null;
-
-	/**
 	 * Mapper file.
 	 *
 	 * @var string
 	 */
 	protected $_file = null;
-
-	/**
-	 * Initialization data.
-	 *
-	 * @var mixed
-	 */
-	protected $_init = null;
 
 	/**
 	 * Delete the current element.
@@ -127,35 +113,6 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 			$file .= '.'.$this->get_file_extension();
 		}
 		return $file;
-	}
-
-	/**
-	 * Get initialization parameters.
-	 *
-	 * @return mixed
-	 */
-	public function get_initialization ()
-	{
-		return $this->_init;
-	}
-
-	/**
-	 * Initialize this mapper.
-	 *
-	 * @param array initialization An array of parameters.
-	 * @return Repository_Mapper
-	 */
-	public function initialize ( $initialization )
-	{
-		$this->_data = null;
-		$this->_init = $initialization;
-
-		if (isset($initialization['query']))
-		{
-			$this->select($initialization['query']);
-		}
-
-		return $this;
 	}
 
 	/**
