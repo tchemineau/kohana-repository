@@ -8,13 +8,6 @@ abstract class Kohana_Repository_Mapper
 {
 
 	/**
-	 * Data mapper.
-	 *
-	 * @var mixed
-	 */
-	protected $_data = null;
-
-	/**
 	 * Initialization.
 	 *
 	 * @var mixed
@@ -111,6 +104,22 @@ abstract class Kohana_Repository_Mapper
 	public abstract function get_current_query ();
 
 	/**
+	 * Calculate a hash from a key.
+	 *
+	 * @param string key Key
+	 * @param string salt Salt
+	 * @return string
+	 */
+	public static function get_hash ( $key, $salt = null )
+	{
+		if (is_null($salt))
+		{
+			$salt = Kohana::$config->load('repository')->get('cache_salt');
+		}
+		return sha1($salt.$key);
+	}
+
+	/**
 	 * Get initialization parameters.
 	 *
 	 * @return mixed
@@ -141,7 +150,6 @@ abstract class Kohana_Repository_Mapper
 	 */
 	public function initialize ( $initialization = null )
 	{
-		$this->_data = null;
 		$this->_init = $initialization;
 
 		if (!is_null($initialization))

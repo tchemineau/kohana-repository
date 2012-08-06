@@ -7,6 +7,13 @@ class Kohana_Repository_Mapper_Xml extends Repository_Mapper_Json
 {
 
 	/**
+	 * Data
+	 *
+	 * @var array
+	 */
+	protected $_data = null;
+
+	/**
 	 * Array uses when parsing XML data.
 	 *
 	 * @var array

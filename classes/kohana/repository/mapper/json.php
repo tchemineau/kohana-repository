@@ -7,6 +7,13 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 {
 
 	/**
+	 * Data
+	 *
+	 * @var array
+	 */
+	protected $_data = null;
+
+	/**
 	 * Mapper file.
 	 *
 	 * @var string

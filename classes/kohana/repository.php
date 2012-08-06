@@ -11,7 +11,7 @@ abstract class Kohana_Repository
 	 *
 	 * @var array
 	 */
-	protected $_data = null;
+	protected $_data = array();
 
 	/**
 	 * Repository mapper.
@@ -35,20 +35,54 @@ abstract class Kohana_Repository
 	}
 
 	/**
-	 * Get data from the repository.
+	 * Set or get data.
 	 *
-	 * @return boolean default The default value to return
 	 * @return array
 	 * @return boolean
-	 * @return mixed
+	 */
+	public function data ( $data = null )
+	{
+		if (is_null($data))
+		{
+			return $this->get_data();
+		}
+		return $this->set_data($data);
+	}
+
+	/**
+	 * Delete the current element into the repository.
+	 *
+	 * @return boolean
+	 */
+	public function delete ()
+	{
+		return $this->mapper()->delete();
+	}
+
+	/**
+	 * Get data from the repository.
+	 *
+	 * @param boolean default The default value to return
+	 * @return array
+	 * @return boolean
 	 */
 	public function get_data ( $default = false )
 	{
-		if (!is_null($this->_data) || $this->_load_data())
+		// Calculate the hash
+		$hash = self::get_hash($this->mapper()->get_current_query());
+
+		// Load data if not previously loaded
+		if (!isset($this->_data[$hash]))
 		{
-			return $this->_data;
+			$this->_load_data();
 		}
-		return $default;
+
+		// Return the appropriate value
+		if (!isset($this->_data[$hash]) || is_null($this->_data[$hash]))
+		{
+			return $default;
+		}
+		return $this->_data[$hash];
 	}
 
 	/**
@@ -58,7 +92,7 @@ abstract class Kohana_Repository
 	 * @param string salt Salt
 	 * @return string
 	 */
-	public static function get_hash ( $key, $salt = null )
+	protected static function get_hash ( $key, $salt = null )
 	{
 		if (is_null($salt))
 		{
@@ -74,7 +108,7 @@ abstract class Kohana_Repository
 	 * @param boolean $force Force to rebuild the mapper.
 	 * @return Repository_Mapper
 	 */
-	public function get_mapper ( $force = false )
+	protected function get_mapper ( $force = false )
 	{
 		if ($force || is_null($this->_mapper))
 		{
@@ -84,32 +118,67 @@ abstract class Kohana_Repository
 	}
 
 	/**
+	 * A alias of get_mapper.
+	 * Instead of returning null, it throws an exception.
+	 *
+	 * @param boolean $force Force to rebuild the mapper.
+	 * @return Repository_Mapper
+	 */
+	public function mapper ( $force = false )
+	{
+		$mapper = $this->get_mapper($force);
+		if (is_null($mapper))
+		{
+			throw new Kohana_Exception('Impossible to get mapper for '.get_class());
+		}
+		return $mapper;
+	}
+
+	/**
+	 * Select an object into the repository through a query.
+	 *
+	 * @param mixed $query
+	 * @return mixed
+	 */
+	public function select ( $query )
+	{
+		$this->mapper()->select($query);
+		return $this;
+	}
+
+	/**
 	 * Set data and save it.
 	 *
 	 * @param array $data New data
 	 * @param boolean $save If data have to be saved now
 	 * @return boolean
 	 */
-	public function set_data ( $data, $save = true )
+	protected function set_data ( $data, $save = true )
 	{
+		// Calculate the hash
+		$hash = self::get_hash($this->mapper()->get_current_query());
+
 		// Here, we check that some values should be removed or not.
-		if (!is_null($this->_data) && !is_null($data))
+		if (isset($this->_data[$hash]) && !is_null($this->_data[$hash]) && !is_null($data))
 		{
+			$cdata = $this->_data[$hash];
+
 			foreach ($data as $key => $value)
 			{
-				$this->_data[$key] = $value;
+				$cdata[$key] = $value;
 
 				// If value is null, it means that we want to remove it.
 				if (is_null($value) || (!is_array($value) && strcasecmp($value, 'null') == 0))
 				{
-					unset($this->_data[$key]);
+					unset($cdata[$key]);
 				}
 			}
+
+			$data = $cdata;
 		}
-		else
-		{
-			$this->_data = $data;
-		}
+
+		// Set data into the internal data array
+		$this->_data[$hash] = $data;
 
 		// By default, data is saved instantly to the repository
 		if ($save)
@@ -118,7 +187,7 @@ abstract class Kohana_Repository
 		}
 
 		// In all other case, set_data could not be into error
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -126,53 +195,53 @@ abstract class Kohana_Repository
 	 *
 	 * @return Repository_Mapper
 	 */
-	protected function _get_mapper ()
-	{
-		return Repository_Mapper::factory()->initialize(array());
-	}
+	protected abstract function _get_mapper ();
 
 	/**
 	 * Load data from the repository and store it into $_data.
 	 * 
 	 * @return boolean
 	 */
-	protected function _load_data ()
+	private function _load_data ()
 	{
 		// Load the repository mapper
-		$mapper = $this->get_mapper();
-		if (is_null($mapper))
-		{
-			return FALSE;
-		}
+		$mapper = $this->mapper();
 
 		// Calculate the hash of the current query
 		$hash = self::get_hash($mapper->get_current_query());
 
+		// Store the cache status.
+		$cache = Kohana::$config->load('repository')->get('cache_query');
+
 		// Load from cache if enable
-		if (Kohana::$config->load('repository')->get('cache_query'))
+		if ($cache && !is_null($hash))
 		{
-			$hash = self::get_hash($mapper->get_current_query());
+			$this->_data[$hash] = Cache::instance()->get($hash);
 
-			if (!is_null($hash))
+			if (!is_null($this->_data[$hash]))
 			{
-				$this->_data = Cache::instance()->get($hash);
-
-				if (!is_null($this->_data))
-				{
-					return TRUE;
-				}
+				return TRUE;
 			}
 		}
 
 		// If not found into cache, then load it
-		$this->_data = $mapper->get_data_as_array();
-		ksort($this->_data);
+		$data = $mapper->get_data_as_array();
+
+		// If it could not be retrieved, return false
+		if (!is_array($data))
+		{
+			return FALSE;
+		}
+
+		// Keep it in memory
+		ksort($data);
+		$this->_data[$hash] = $data;
 
 		// Save into cache if enable
-		if (Kohana::$config->load('repository')->get('cache_query'))
+		if ($cache)
 		{
 			$expire = Kohana::$config->load('repository')->get('cache_maxage');
-			Cache::instance()->set($hash, $this->_data, $expire);
+			Cache::instance()->set($hash, $this->_data[$hash], $expire);
 		}
 
 		// Data load could not be into error
@@ -184,19 +253,20 @@ abstract class Kohana_Repository
 	 *
 	 * @return boolean
 	 */
-	protected function _save_data ()
+	private function _save_data ()
 	{
+		// Store result
+		$result = FALSE;
+
 		// Load the mapper
-		$mapper = $this->get_mapper();
-		if (is_null($mapper))
-		{
-			return FALSE;
-		}
+		$mapper = $this->mapper();
 
 		// Save data as array into the repository
 		$data = $this->get_data();
-		$mapper->set_data_from_array($data);
-		$result = $mapper->modify();
+		if ($mapper->set_data_from_array($data))
+		{
+			$result = $mapper->modify();
+		}
 
 		// Remove data into cache if enable and if the modification is successful
 		if ($result && Kohana::$config->load('repository')->get('cache_query'))
