@@ -73,10 +73,6 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	 */
 	public function get_data_as_array ()
 	{
-		if (!is_null($this->_data))
-		{
-			return $this->_data;
-		}
 		$file = $this->get_file();
 		if (!is_file($file))
 		{
