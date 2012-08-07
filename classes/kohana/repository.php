@@ -11,7 +11,7 @@ abstract class Kohana_Repository
 	 *
 	 * @var array
 	 */
-	protected $_data = array();
+	protected static $_data = array();
 
 	/**
 	 * Repository mapper.
@@ -72,17 +72,17 @@ abstract class Kohana_Repository
 		$hash = self::get_hash($this->mapper()->get_current_query());
 
 		// Load data if not previously loaded
-		if (!isset($this->_data[$hash]))
+		if (!isset(self::$_data[$hash]))
 		{
 			$this->_load_data();
 		}
 
 		// Return the appropriate value
-		if (!isset($this->_data[$hash]) || is_null($this->_data[$hash]))
+		if (!isset(self::$_data[$hash]) || is_null(self::$_data[$hash]))
 		{
 			return $default;
 		}
-		return $this->_data[$hash];
+		return self::$_data[$hash];
 	}
 
 	/**
@@ -159,9 +159,9 @@ abstract class Kohana_Repository
 		$hash = self::get_hash($this->mapper()->get_current_query());
 
 		// Here, we check that some values should be removed or not.
-		if (isset($this->_data[$hash]) && !is_null($this->_data[$hash]) && !is_null($data))
+		if (isset(self::$_data[$hash]) && !is_null(self::$_data[$hash]) && !is_null($data))
 		{
-			$cdata = $this->_data[$hash];
+			$cdata = self::$_data[$hash];
 
 			foreach ($data as $key => $value)
 			{
@@ -178,7 +178,7 @@ abstract class Kohana_Repository
 		}
 
 		// Set data into the internal data array
-		$this->_data[$hash] = $data;
+		self::$_data[$hash] = $data;
 
 		// By default, data is saved instantly to the repository
 		if ($save)
@@ -216,9 +216,9 @@ abstract class Kohana_Repository
 		// Load from cache if enable
 		if ($cache && !is_null($hash))
 		{
-			$this->_data[$hash] = Cache::instance()->get($hash);
+			self::$_data[$hash] = Cache::instance()->get($hash);
 
-			if (!is_null($this->_data[$hash]))
+			if (!is_null(self::$_data[$hash]))
 			{
 				return TRUE;
 			}
@@ -235,13 +235,13 @@ abstract class Kohana_Repository
 
 		// Keep it in memory
 		ksort($data);
-		$this->_data[$hash] = $data;
+		self::$_data[$hash] = $data;
 
 		// Save into cache if enable
 		if ($cache)
 		{
 			$expire = Kohana::$config->load('repository')->get('cache_maxage');
-			Cache::instance()->set($hash, $this->_data[$hash], $expire);
+			Cache::instance()->set($hash, self::$_data[$hash], $expire);
 		}
 
 		// Data load could not be into error
