@@ -14,6 +14,13 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	protected $_data = null;
 
 	/**
+	 * Data file
+	 *
+	 * @var string
+	 */
+	protected $_datafile = null;
+
+	/**
 	 * Mapper file.
 	 *
 	 * @var string
@@ -74,11 +81,16 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	public function get_data_as_array ()
 	{
 		$file = $this->get_file();
+		if (!is_null($this->_data) && !is_null($this->_datafile) && $this->_datafile == $file)
+		{
+			return $this->_data;
+		}
 		if (!is_file($file))
 		{
-			return Array();
+			return array();
 		}
 		$this->set_data_from_string(file_get_contents($file));
+		$this->_datafile = $file;
 		return $this->_data;
 	}
 
