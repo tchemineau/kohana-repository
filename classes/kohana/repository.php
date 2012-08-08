@@ -50,6 +50,16 @@ abstract class Kohana_Repository
 	}
 
 	/**
+	 * Indicates if the current element exists.
+	 *
+	 * @return boolean
+	 */
+	public function exists ()
+	{
+		return $this->mapper()->exists();
+	}
+
+	/**
 	 * Delete the current element into the repository.
 	 *
 	 * @return boolean
@@ -271,7 +281,7 @@ abstract class Kohana_Repository
 		// Remove data into cache if enable and if the modification is successful
 		if ($result && Kohana::$config->load('repository')->get('cache_query'))
 		{
-			$hash = $mapper->get_hash($mapper->get_current_query());
+			$hash = self::get_hash($mapper->get_current_query());
 
 			if (!is_null($hash))
 			{
