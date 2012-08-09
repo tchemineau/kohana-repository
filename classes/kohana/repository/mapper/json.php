@@ -34,7 +34,7 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	 */
 	public function delete ()
 	{
-		$status = true;
+		$status = TRUE;
 
 		// If the current element is a file, delete the file
 		$file = $this->get_file();
@@ -137,6 +137,11 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 	 */
 	public function modify ()
 	{
+		if (is_null($this->_data))
+		{
+			return TRUE;
+		}
+
 		$file = $this->get_file();
 		$dir = dirname($file);
 
@@ -146,12 +151,12 @@ class Kohana_Repository_Mapper_Json extends Repository_Mapper
 
 			if ($fp !== false)
 			{
-				fwrite($fp, $this->get_data_as_string());
+				fwrite($fp, json_encode($this->_data));
 				fclose($fp);
-				return true;
+				return TRUE;
 			}
 		}
-		return false;
+		return FALSE;
 	}
 
 	/**
