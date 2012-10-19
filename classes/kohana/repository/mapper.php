@@ -134,7 +134,7 @@ abstract class Kohana_Repository_Mapper
 	 *
 	 * @return string
 	 */
-	public static function get_type ()
+	public function get_type ()
 	{
 		return $this->_type;
 	}
