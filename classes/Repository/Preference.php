@@ -15,7 +15,7 @@
  *
  * 1/ If you want to save your preferences:
  *
- *   $preferences = Repository::factory('preference');
+ *   $preferences = Repository::factory('Preference');
  *   $preferences->set_data(array(
  *     'var1' => 'sample value 1',
  *     'var2' => array(
@@ -25,7 +25,7 @@
  *
  * 2/ If you want to retrieve your preferences previously saved:
  *
- *   $preferences = Repository::factory('preference');
+ *   $preferences = Repository::factory('Preference');
  *   $data = $preferences->get_data();
  *
  * Note that you can enable cache by editing the configuration file. If so, be
