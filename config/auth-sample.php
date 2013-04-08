@@ -3,7 +3,7 @@
 return array(
 
 	// Specify that auth should use repository driver
-	'driver'       => 'repository',
+	'driver'       => 'Repository',
 
 	// Classic auth configuration parameter
 	'lifetime'     => 1209600,

@@ -20,15 +20,16 @@ return array
 
 	/**
 	 * Default data mapper to use.
+	 * Case-sensitive
 	 */
-	'mapper_default' => 'json',
+	'mapper_default' => 'Json',
 
 	/**
 	 * Old used data mapper.
 	 * Enable this when you need to migrate your data
 	 * from a mapper to a new one.
 	 */
-	// 'mapper_from' => 'xml',
+	// 'mapper_from' => 'Xml',
 
 );
 
